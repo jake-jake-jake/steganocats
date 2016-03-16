@@ -86,3 +86,4 @@ ENV/
 
 # Specific For this project
 steganocats.json
+*.sublime-project
