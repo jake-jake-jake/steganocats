@@ -1,11 +1,15 @@
+#!/usr/bin/env python3
+
+import datetime
 import json
 import random
+import urllib.request
 
 
 import flickrapi
 from PIL import Image, ImageDraw, ImageFont
 
-SECRETS_FILE = 'steganocats.json'
+SECRETS_FILE = 'secrets.json'
 
 
 # Flickr functions (for getting images)
@@ -28,10 +32,19 @@ def make_flickr_api(secrets_filename, format='json'):
                                format=format)
 
 
-def get_flickr_photos(FlickrAPI_obj, terms, is_commons=True):
-    ''' Query instantiated FlickrAPI object for terms'''
-    photo_json = FlickrAPI_obj.photos.search(terms)
-    return photo_json
+def get_image_urls(tag='cat'):
+    ''' Return a list of URLs to query for images.'''
+    resp = flickr.photos.search(tags=tag, is_commons=True)
+    resp = json.loads(str(resp, 'utf8'))
+    urls = []
+    for photo in resp['photos']['photo']:
+        photo_id, secret = photo['id'], photo['secret']
+        info = flickr.photos.getInfo(photo_id=photo_id, secret=secret)
+        info = json.loads(str(info, 'utf8'))
+        urls.append(info['url'])
+    return urls
+
+
 
 
 # PIL functions for processing image
@@ -73,24 +86,20 @@ def draw_pix(img_obj, message, pos=None):
     try:
         flag = make_flag(x, message)
     except:
-        raise ValueError('Message will not fit in image.')
-    
-    # Write to bottom of image of no position specified
-    if not pos:
-        pos = y - 1
+        raise ValueError('Message will not fit in image.')    
 
     pixels = img_obj.load()
-    # Randomize bottom row of pixels.
-    for px in range(x):
+
+    if not pos:  # Write to bottom of image of no position specified
+        pos = y - 1
+    for px in range(x):  # Randomize bottom row of pixels.
         pixels[px, pos] = random.randint(0, 255)
-
-    # Write flag
-    for px in range(0, len(flag)):
+    for px in range(0, len(flag)):  # Randomize bottom row of pixels.
         pixels[px, pos] = flag[px]
-
-    # Get step for writing pixels
-    step = (x - len(flag)) // len(message)
-    i = 0  # There likely is a Pythonic way to do this... but
+    step = (x - len(flag)) // len(message)  # Get step for writing pixels
+    
+    #  Encode message
+    i = 0  
     for px in range(len(flag), x, step):
         try:
             pixels[px, pos] = ord(message[i])
@@ -112,7 +121,7 @@ def read_pix(img_obj, check_byte=b'\n', pos=None):
     if not pix_strip[0] == ord(check_byte):
         raise ValueError('Check byte not found.')
 
-    # Find length of message.
+    # Find length of message
     idx, count = 1, []
     while True:
         if not pix_strip[idx] == 0x00:
@@ -123,23 +132,21 @@ def read_pix(img_obj, check_byte=b'\n', pos=None):
             break
     else:
         raise ValueError('End flag not found.')
+    # Get step of embedding and retrieve message.
     message_len = int.from_bytes(count, byteorder='little')
     step = (x - idx) // message_len
     message_pixels = [chr(pix_strip[x]) for x in range(idx, x, step)]
-    return message_pixels
-
-
-
-
+    return message_pixels[:message_len]
 
 
 
 flickr = make_flickr_api(SECRETS_FILE)
+urls = get_image_urls()
 
-grey_kitty = to_greyscale('kitten.jpg')
-grey_kitty_stegged = write_steg(grey_kitty, 'katz r kewl')
-kitty = Image.open('kitten.jpg')
-grey_pix = draw_pix(grey_kitty_stegged, "This is like a hidden message." * 5 )
-grey_kitty_stegged.save('gks-stripes.jpg')
+# grey_kitty = to_greyscale('kitten.jpg')
+# grey_kitty_stegged = write_steg(grey_kitty, 'katz r kewl')
+# kitty = Image.open('kitten.jpg')
+# grey_pix = draw_pix(grey_kitty_stegged, "This is like a hidden message." * 5 )
+# grey_kitty_stegged.save('gks-stripes.jpg')
 
-print(''.join(read_pix(grey_kitty_stegged)))
+# print(''.join(read_pix(grey_kitty_stegged)))

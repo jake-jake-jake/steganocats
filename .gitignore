@@ -85,5 +85,5 @@ ENV/
 .spyderproject
 
 # Specific For this project
-steganocats.json
+secrets.json
 *.sublime-project
