@@ -70,7 +70,7 @@ def make_flag(x_width, message, flag=b'\n'):
     # Get bytes needed to represent length of message
     byte_len, overflow_bits = divmod(len(message).bit_length(), 8)
     if overflow_bits: byte_len += 1
-    
+
     # If x_width not greater than len(message) + byte_len + null byte end flag
     # Throw an error
     assert x_width > len(message) + byte_len + 1
@@ -81,12 +81,12 @@ def make_flag(x_width, message, flag=b'\n'):
 def draw_pix(img_obj, message, pos=None):
     ''' Get horiz strip of pixels from img_obj.'''
     x, y = img_obj.size
-    
+
     # Make insertion flag
     try:
         flag = make_flag(x, message)
     except:
-        raise ValueError('Message will not fit in image.')    
+        raise ValueError('Message will not fit in image.')
 
     pixels = img_obj.load()
 
@@ -97,9 +97,9 @@ def draw_pix(img_obj, message, pos=None):
     for px in range(0, len(flag)):  # Randomize bottom row of pixels.
         pixels[px, pos] = flag[px]
     step = (x - len(flag)) // len(message)  # Get step for writing pixels
-    
+
     #  Encode message
-    i = 0  
+    i = 0
     for px in range(len(flag), x, step):
         try:
             pixels[px, pos] = ord(message[i])
@@ -139,14 +139,13 @@ def read_pix(img_obj, check_byte=b'\n', pos=None):
     return message_pixels[:message_len]
 
 
-
 flickr = make_flickr_api(SECRETS_FILE)
 urls = get_image_urls()
 
 # grey_kitty = to_greyscale('kitten.jpg')
 # grey_kitty_stegged = write_steg(grey_kitty, 'katz r kewl')
 # kitty = Image.open('kitten.jpg')
-# grey_pix = draw_pix(grey_kitty_stegged, "This is like a hidden message." * 5 )
+# grey_pix = draw_pix(grey_kitty_stegged, "This is like a hidden message." * 5)
 # grey_kitty_stegged.save('gks-stripes.jpg')
 
 # print(''.join(read_pix(grey_kitty_stegged)))
