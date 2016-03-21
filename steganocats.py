@@ -136,16 +136,17 @@ def read_pix(img_obj, check_byte=b'\n', pos=None):
     message_len = int.from_bytes(count, byteorder='little')
     step = (x - idx) // message_len
     message_pixels = [chr(pix_strip[x]) for x in range(idx, x, step)]
-    return message_pixels[:message_len]
+    return ''.join(message_pixels[:message_len])
 
 
-flickr = make_flickr_api(SECRETS_FILE)
-urls = get_image_urls()
+# flickr = make_flickr_api(SECRETS_FILE)
+# urls = get_image_urls()
 
-# grey_kitty = to_greyscale('kitten.jpg')
-# grey_kitty_stegged = write_steg(grey_kitty, 'katz r kewl')
-# kitty = Image.open('kitten.jpg')
-# grey_pix = draw_pix(grey_kitty_stegged, "This is like a hidden message." * 5)
-# grey_kitty_stegged.save('gks-stripes.jpg')
+grey_kitty = to_greyscale('kitten.jpg')
+grey_kitty_stegged = write_steg(grey_kitty, 'katz r kewl')
+kitty = Image.open('kitten.jpg')
+grey_pix = draw_pix(grey_kitty_stegged, "This is like a hidden message." * 5)
+grey_kitty_stegged.save('gks-stripes.jpg')
+print(read_pix(grey_kitty))
 
-# print(''.join(read_pix(grey_kitty_stegged)))
+print(''.join(read_pix(grey_kitty_stegged)))
