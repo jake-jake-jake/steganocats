@@ -45,12 +45,17 @@ def get_image_urls(tag='cat'):
 # flickr = make_flickr_api(SECRETS_FILE)
 # urls = get_image_urls()
 
-msg = '''The Naming of Cats is a difficult matter,
-It isn't just one of your holiday games;
-You may think at first I'm as mad as a hatter
-When I tell you, a cat must have THREE DIFFERENT NAMES.'''
-meme_writer = MemeWriter()
-steganocat = meme_writer.write_meme('kitten.jpg', 'katz r kewl')
-meme_writer.hide_msg(steganocat, msg)
-steganocat.save('gks-stripes.jpg')
-print(meme_writer.find_msg(steganocat))
+def main(debug=False):
+    if debug:
+        msg = '''The Naming of Cats is a difficult matter,
+        It isn't just one of your holiday games;
+        You may think at first I'm as mad as a hatter
+        When I tell you, a cat must have THREE DIFFERENT NAMES.'''
+        meme_writer = MemeWriter()
+        steganocat = meme_writer.write_meme('kitten.jpg', 'katz r kewl')
+        meme_writer.hide_msg(steganocat, msg)
+        steganocat.save('gks-stripes.jpg')
+        print(meme_writer.find_msg(steganocat))
+
+if __name__ == '__main__':
+    main()
