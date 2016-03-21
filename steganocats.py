@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
 import json
-from os import path
+from os import path, listdir
 import requests
+import random
 
 import flickrapi
 
@@ -49,7 +50,7 @@ def download_img(farm, server, photo_id, secret, owner, o_secret):
 
 def get_images_by_tag(tag='cat'):
     ''' Return a list of URLs to query for images.'''
-    resp = flickr.photos.search(tags=tag, is_commons=True)
+    resp = flickr.photos.search(tags=tag, license=7)
     resp = json.loads(str(resp, 'utf8'))
     for photo in resp['photos']['photo']:
         photo_id, secret, owner = photo['id'], photo['secret'], photo['owner']
@@ -62,20 +63,30 @@ def get_images_by_tag(tag='cat'):
     pass
 
 
+def get_img_file(img_folder):
+    ''' Return random image from specified folder.'''
+    file_name = random.choice(listdir(img_folder))
+    return file_name
+
+
+
 # flickr = make_flickr_api(SECRETS_FILE)
 # get_images_by_tag('kitty')
 
-def main(debug=False):
+def main(debug=True):
     if debug:
-        msg = '''The Naming of Cats is a difficult matter,
-        It isn't just one of your holiday games;
-        You may think at first I'm as mad as a hatter
-        When I tell you, a cat must have THREE DIFFERENT NAMES.'''
-        meme_writer = MemeWriter()
-        steganocat = meme_writer.write_meme('kitten.jpg', 'katz r kewl')
-        meme_writer.hide_msg(steganocat, msg)
-        steganocat.save('gks-stripes.jpg')
-        print(meme_writer.find_msg(steganocat))
+        for _ in range(10):
+            img_folder = path.relpath('scraped_images/')
+            save_folder = path.relpath('memes/')
+            msg = '''The Naming of Cats is a difficult matter,
+            It isn't just one of your holiday games;
+            You may think at first I'm as mad as a hatter
+            When I tell you, a cat must have THREE DIFFERENT NAMES.'''
+            meme_writer = MemeWriter()
+            steganocat = meme_writer.write_meme(img_folder + '/' + 
+                get_img_file(img_folder), 'Hazburger')
+            meme_writer.hide_msg(steganocat, msg)
+            steganocat.save(save_folder + '/' + str(_) + ".jpg")
 
 if __name__ == '__main__':
     main()
