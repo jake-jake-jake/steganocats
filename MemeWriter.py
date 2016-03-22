@@ -81,8 +81,10 @@ class MemeWriter:
         b = self._set_border(x) 
         draw.text((x_insert-b, y_insert), phrase, font=font, fill='black')
         draw.text((x_insert, y_insert-b), phrase, font=font, fill='black')
+        draw.text((x_insert-b, y_insert+b), phrase, font=font, fill='black')
         draw.text((x_insert+b, y_insert), phrase, font=font, fill='black')
         draw.text((x_insert, y_insert+b), phrase, font=font, fill='black')
+        draw.text((x_insert+b, y_insert-b), phrase, font=font, fill='black')
         # draw fill
         draw.text((x_insert, y_insert), phrase, font=font, fill='white')
         return img_obj
@@ -97,31 +99,61 @@ class MemeWriter:
         x, y = img_obj.size
         if not mode:  # if no mode passed, default to instance variable.
             mode = self.mode
+        if not pos:  # Write to bottom row of image of no position specified
+            pos = y - 1
 
         # Make insertion flag
         try:
             f = self._make_flag_bytes(x, hidden)
         except Exception as E:
             raise ValueError('Message will not fit in image.')
-
+        # load image pixels
         pixels = img_obj.load()
-        if not pos:  # Write to bottom row of image of no position specified
-            pos = y - 1
-        for px in range(x):  # Randomize target row of pixels.
-            pixels[px, pos] = random.randint(0, 255)
-        for px in range(0, len(f)):  # Write flag bytes
-            pixels[px, pos] = f[px]
-        step = (x - len(f)) // len(hidden)  # Get step for writing pixels
 
-        #  Encode message
-        i = 0
-        for px in range(len(f), x, step):
-            try:
-                pixels[px, pos] = ord(hidden[i])
-            except:
-                break
-            i += 1
-        pass
+        # In black and white images, only one byte per pix
+        if mode == 'L':
+            for px in range(x):  # Randomize target row of pixels.
+                pixels[px, pos] = random.randint(0, 255)
+            for px in range(0, len(f)):  # Write flag bytes
+                pixels[px, pos] = f[px]
+            step = (x - len(f)) // len(hidden)  # Get step for writing pixels
+
+            #  Encode message
+            i = 0
+            for px in range(len(f), x, step):
+                try:
+                    pixels[px, pos] = ord(hidden[i])
+                except:
+                    break
+                i += 1
+            pass
+
+        # RGBA images on the other hand have 4 bytes per pixel:
+        elif mode == 'RGBA':
+            for px in range(x):  # Randomize target row of pixels.
+                r, g, b, a = pixels[px, pos]
+                new_a = random.randint(0, 255)
+                pixels[px, pos] = (r, g, b, new_a)
+            for px in range(0, len(f)):  # Write flag bytes
+                r, g, b, a = pixels[px, pos]
+                new_a = f[px]
+                pixels[px, pos] = (r, g, b, new_a)
+            step = (x - len(f)) // len(hidden)  # Get step for writing pixels
+
+            #  Encode message
+            i = 0
+            for px in range(len(f), x, step):
+                try:
+                    r, g, b, a = pixels[px, pos]
+                    new_a = ord(hidden[i])
+                    pixels[px, pos] = (r, g, b, new_a)
+                except:
+                    break
+                i += 1
+            pass
+
+        else:
+            raise AttributeError('Only greyscale and RGBA imges supported.')
 
     def find_msg(self, img_obj, pos=None, mode=None):
         ''' Find hidden message in an image.'''
@@ -134,25 +166,54 @@ class MemeWriter:
         # Get strip of pixels that encode message from image.
         pixels = img_obj.load()
         pix_strip = [pixels[px, pos] for px in range(x)]
-        if not pix_strip[0] == ord(self.flag):
-            raise ValueError('Check byte not found.')
 
-        # Find length of message
-        idx, count = 1, []
-        while True:
-            if not pix_strip[idx] == 0x00: 
-                count.append(pix_strip[idx])
-                idx += 1
+        # For black and white images (one byte for pixel)
+        if mode == 'L':
+            if not pix_strip[0] == ord(self.flag):
+                raise ValueError('Check byte not found.')
+
+            # Find length of message
+            idx, count = 1, []
+            while True:
+                if not pix_strip[idx] == 0x00: 
+                    count.append(pix_strip[idx])
+                    idx += 1
+                else:
+                    idx += 1
+                    break
             else:
-                idx += 1
-                break
+                raise ValueError('End flag not found.')
+            # Get step of embedding and retrieve message.
+            message_len = int.from_bytes(count, byteorder='little')
+            step = (x - idx) // message_len
+            message_pixels = [chr(pix_strip[x]) for x in range(idx, x, step)]
+            return ''.join(message_pixels[:message_len])
+
+            if not pix_strip[0] == ord(self.flag):
+                raise ValueError('Check byte not found.')
+
+        elif mode == 'RGBA':
+            if not pix_strip[0][3] == ord(self.flag):
+                raise ValueError('Check byte not found.')
+            # Find length of message
+            idx, count = 1, []
+            while True:
+                if not pix_strip[idx][3] == 0x00: 
+                    count.append(pix_strip[idx][3])
+                    idx += 1
+                else:
+                    idx += 1
+                    break
+            else:
+                raise ValueError('End flag not found.')
+            # Get step of embedding and retrieve message.
+            message_len = int.from_bytes(count, byteorder='little')
+            step = (x - idx) // message_len
+            message_pixels = [chr(pix_strip[x][3]) for x in range(idx, x, step)]
+            return ''.join(message_pixels[:message_len])
+
         else:
-            raise ValueError('End flag not found.')
-        # Get step of embedding and retrieve message.
-        message_len = int.from_bytes(count, byteorder='little')
-        step = (x - idx) // message_len
-        message_pixels = [chr(pix_strip[x]) for x in range(idx, x, step)]
-        return ''.join(message_pixels[:message_len])
+            raise AttributeError('Unsupported photo mode')
 
 def main():
     ''' Some debug tests for when this is being put together'''
@@ -160,8 +221,8 @@ def main():
               It isn't just one of your holiday games;
               You may think at first I'm as mad as a hatter
               When I tell you, a cat must have THREE DIFFERENT NAMES.'''
-    meme_writer = MemeWriter()
-    steganocat = meme_writer.write_meme('kitten.jpg', 'all teh cats r here now')
+    meme_writer = MemeWriter(mode='RGBA')
+    steganocat = meme_writer.write_meme('kitten.jpg', 'Steganocats hide yr things'.upper())
     meme_writer.hide_msg(steganocat, msg)
     steganocat.save('written_cat.jpg')
     print(meme_writer.find_msg(steganocat))
