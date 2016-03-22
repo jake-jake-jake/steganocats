@@ -54,7 +54,7 @@ class MemeWriter:
         text_x, text_y = draw_obj.textsize(phrase, font)
         if text_x < x * 8 // 10:
             return self._get_size(draw_obj, x, phrase, size + 1)
-        else: 
+        else:
             return size
 
     @staticmethod
@@ -78,7 +78,7 @@ class MemeWriter:
         size = self._get_size(draw, x, phrase)
         font = ImageFont.truetype('impact.ttf', size=size)
         # draw borders
-        b = self._set_border(x) 
+        b = self._set_border(x)
         draw.text((x_insert-b, y_insert), phrase, font=font, fill='black')
         draw.text((x_insert, y_insert-b), phrase, font=font, fill='black')
         draw.text((x_insert-b, y_insert+b), phrase, font=font, fill='black')
@@ -105,7 +105,7 @@ class MemeWriter:
         # Make insertion flag
         try:
             f = self._make_flag_bytes(x, hidden)
-        except Exception as E:
+        except Exception:
             raise ValueError('Message will not fit in image.')
         # load image pixels
         pixels = img_obj.load()
@@ -229,3 +229,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    
