@@ -52,7 +52,6 @@ class MemeWriter:
         ''' Return best font size for phrase given x width of image'''
         font = ImageFont.truetype('impact.ttf', size=size)
         text_x, text_y = draw_obj.textsize(phrase, font)
-        print(text_x, text_y)
         if text_x < x * 8 // 10:
             return self._get_size(draw_obj, x, phrase, size + 1)
         else: 
@@ -67,7 +66,11 @@ class MemeWriter:
         draw = ImageDraw.Draw(img_obj)
         size = self._get_size(draw, x, phrase)
         font = ImageFont.truetype('impact.ttf', size=size)
-        draw = ImageDraw.Draw(img_obj)
+        # draw borders
+        draw.text((x_insert-3, y_insert), phrase, font=font, fill='black')
+        draw.text((x_insert, y_insert-3), phrase, font=font, fill='black')
+        draw.text((x_insert+3, y_insert), phrase, font=font, fill='black')
+        draw.text((x_insert, y_insert+3), phrase, font=font, fill='black')       
         draw.text((x_insert, y_insert), phrase, font=font, fill='white')
         return img_obj
 
