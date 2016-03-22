@@ -34,11 +34,14 @@ def make_flickr_api(secrets_filename, format='json'):
 
 def download_img(farm, server, photo_id, secret, owner, o_secret):
     ''' Given metadata from tag search JSON, attempt to DL image.'''
-    url = 'https://farm{}.staticflickr.com/{}/{}_{}_o.jpg'.format(farm,
-            server, photo_id, o_secret)
+    file_path = path.relpath('scraped_images/' + photo_id + '_' + owner)
+    if path.isfile(file_path):
+        print('Already have image.')
+        return False
+    url = 'https://farm{}.staticflickr.com/{}/{}_{}_k.jpg'.format(farm,
+            server, photo_id, secret)
     print('Using URL: \n %s' % url)
     r =  requests.get(url)
-    file_path = path.relpath('scraped_images/' + photo_id + '_' + owner)
     if r.status_code == 200:
         with open(file_path, 'wb') as f:
             f.write(r.content)
@@ -50,7 +53,7 @@ def download_img(farm, server, photo_id, secret, owner, o_secret):
 
 def get_images_by_tag(tag='cat'):
     ''' Return a list of URLs to query for images.'''
-    resp = flickr.photos.search(tags=tag, license=7)
+    resp = flickr.photos.search(tags=tag, license=[1,2,3,5])
     resp = json.loads(str(resp, 'utf8'))
     for photo in resp['photos']['photo']:
         photo_id, secret, owner = photo['id'], photo['secret'], photo['owner']
@@ -70,10 +73,10 @@ def get_img_file(img_folder):
 
 
 
-# flickr = make_flickr_api(SECRETS_FILE)
-# get_images_by_tag('kitty')
+flickr = make_flickr_api(SECRETS_FILE)
+get_images_by_tag('kitty')
 
-def main(debug=True):
+def main(debug=False):
     if debug:
         for _ in range(10):
             img_folder = path.relpath('scraped_images/')
