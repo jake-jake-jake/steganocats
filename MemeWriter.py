@@ -57,6 +57,17 @@ class MemeWriter:
         else: 
             return size
 
+    @staticmethod
+    def _set_border(x):
+        ''' Set pixel size for text border based of img x width.'''
+        if x < 1000:
+            return 1
+        elif x < 1500:
+            return 2
+        elif x < 3000:
+            return 3
+        else:
+            return 4
 
     def write_meme(self, img_filename, phrase):
         ''' Returns image with hazburger phrase superimposed on it.'''
@@ -67,10 +78,12 @@ class MemeWriter:
         size = self._get_size(draw, x, phrase)
         font = ImageFont.truetype('impact.ttf', size=size)
         # draw borders
-        draw.text((x_insert-3, y_insert), phrase, font=font, fill='black')
-        draw.text((x_insert, y_insert-3), phrase, font=font, fill='black')
-        draw.text((x_insert+3, y_insert), phrase, font=font, fill='black')
-        draw.text((x_insert, y_insert+3), phrase, font=font, fill='black')       
+        b = self._set_border(x) 
+        draw.text((x_insert-b, y_insert), phrase, font=font, fill='black')
+        draw.text((x_insert, y_insert-b), phrase, font=font, fill='black')
+        draw.text((x_insert+b, y_insert), phrase, font=font, fill='black')
+        draw.text((x_insert, y_insert+b), phrase, font=font, fill='black')
+        # draw fill
         draw.text((x_insert, y_insert), phrase, font=font, fill='white')
         return img_obj
 
@@ -89,7 +102,7 @@ class MemeWriter:
         try:
             f = self._make_flag_bytes(x, hidden)
         except Exception as E:
-            raise ValueError('Message will not fit in image.')    
+            raise ValueError('Message will not fit in image.')
 
         pixels = img_obj.load()
         if not pos:  # Write to bottom row of image of no position specified
@@ -110,11 +123,13 @@ class MemeWriter:
             i += 1
         pass
 
-    def find_msg(self, img_obj, pos=None):
+    def find_msg(self, img_obj, pos=None, mode=None):
         ''' Find hidden message in an image.'''
         x, y = img_obj.size
         if not pos:
             pos = y - 1
+        if not mode:  # if no mode passed, default to instance variable.
+            mode = self.mode
 
         # Get strip of pixels that encode message from image.
         pixels = img_obj.load()
