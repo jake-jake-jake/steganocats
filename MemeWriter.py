@@ -48,12 +48,24 @@ class MemeWriter:
             pass
         return hits[0]
 
+    def _get_size(self, draw_obj, x, phrase, size=20):
+        ''' Return best font size for phrase given x width of image'''
+        font = ImageFont.truetype('impact.ttf', size=size)
+        text_x, text_y = draw_obj.textsize(phrase, font)
+        print(text_x, text_y)
+        if text_x < x * 8 // 10:
+            return self._get_size(draw_obj, x, phrase, size + 1)
+        else: 
+            return size
+
+
     def write_meme(self, img_filename, phrase):
         ''' Returns image with hazburger phrase superimposed on it.'''
         img_obj = self._open_img(img_filename)
         x, y = img_obj.size
-        x_insert, y_insert = x // 2, 2 * y // 3
-        size = y // 10
+        x_insert, y_insert = x // 10, 4 * y // 5
+        draw = ImageDraw.Draw(img_obj)
+        size = self._get_size(draw, x, phrase)
         font = ImageFont.truetype('impact.ttf', size=size)
         draw = ImageDraw.Draw(img_obj)
         draw.text((x_insert, y_insert), phrase, font=font, fill='white')
@@ -131,7 +143,7 @@ def main():
               You may think at first I'm as mad as a hatter
               When I tell you, a cat must have THREE DIFFERENT NAMES.'''
     meme_writer = MemeWriter()
-    steganocat = meme_writer.write_meme('kitten.jpg', 'kitty hazburger')
+    steganocat = meme_writer.write_meme('kitten.jpg', 'all teh cats r here now')
     meme_writer.hide_msg(steganocat, msg)
     steganocat.save('written_cat.jpg')
     print(meme_writer.find_msg(steganocat))
