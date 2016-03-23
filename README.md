@@ -29,8 +29,8 @@ The `flag` attribute is the byte MemeWriter uses to mark the first pixel of a ro
 
 ### hide_ and find_msg
 
-These two messages currently taken a Pillow image object as an argument; I may change this to an image filename in the future. hide_msg takes `hidden` as an argument; hidden should be a byteliteral. 
+These two messages currently taken a Pillow image object as an argument; I may change this to an image filename in the future. hide_msg takes `hidden` as an argument; `hidden` should be a byteliteral. 
 
- 
+
 
 
