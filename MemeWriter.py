@@ -69,9 +69,9 @@ class MemeWriter:
         else:
             return 4
 
-    def write_meme(self, img_filename, phrase):
+    def write_meme(self, fp, phrase):
         ''' Returns image with hazburger phrase superimposed on it.'''
-        img_obj = self._open_img(img_filename)
+        img_obj = self._open_img(fp)
         x, y = img_obj.size
         x_insert, y_insert = x // 10, 4 * y // 5
         draw = ImageDraw.Draw(img_obj)
@@ -122,7 +122,7 @@ class MemeWriter:
             i = 0
             for px in range(len(f), x, step):
                 try:
-                    pixels[px, pos] = ord(hidden[i])
+                    pixels[px, pos] = int(hidden[i])
                 except:
                     break
                 i += 1
@@ -145,7 +145,7 @@ class MemeWriter:
             for px in range(len(f), x, step):
                 try:
                     r, g, b, a = pixels[px, pos]
-                    new_a = ord(hidden[i])
+                    new_a = int(hidden[i])
                     pixels[px, pos] = (r, g, b, new_a)
                 except:
                     break
@@ -186,8 +186,9 @@ class MemeWriter:
             # Get step of embedding and retrieve message.
             message_len = int.from_bytes(count, byteorder='little')
             step = (x - idx) // message_len
-            message_pixels = [chr(pix_strip[x]) for x in range(idx, x, step)]
-            return ''.join(message_pixels[:message_len])
+            message_pixels = bytes([pix_strip[x] 
+                             for x in range(idx, x, step)])
+            return message_pixels[:message_len]
 
             if not pix_strip[0] == ord(self.flag):
                 raise ValueError('Check byte not found.')
@@ -209,23 +210,27 @@ class MemeWriter:
             # Get step of embedding and retrieve message.
             message_len = int.from_bytes(count, byteorder='little')
             step = (x - idx) // message_len
-            message_pixels = [chr(pix_strip[x][3]) for x in range(idx, x, step)]
-            return ''.join(message_pixels[:message_len])
+            message_pixels = bytes([pix_strip[x][3]
+                             for x in range(idx, x, step)])
+            return message_pixels[:message_len]
 
         else:
             raise AttributeError('Unsupported photo mode')
 
-def main():
+def main(debug=True):
     ''' Some debug tests for when this is being put together'''
-    msg = ''' The Naming of Cats is a difficult matter,
+    msg = b''' The Naming of Cats is a difficult matter,
               It isn't just one of your holiday games;
               You may think at first I'm as mad as a hatter
               When I tell you, a cat must have THREE DIFFERENT NAMES.'''
+    emb = open('grey_thumb.jpg', 'rb').read()
     meme_writer = MemeWriter(mode='RGBA')
-    steganocat = meme_writer.write_meme('kitten.jpg', 'Steganocats hide yr things'.upper())
-    meme_writer.hide_msg(steganocat, msg)
-    steganocat.save('written_cat.jpg')
-    print(meme_writer.find_msg(steganocat))
+    steganocat = meme_writer.write_meme('4729470797_c93d775dc1_o.jpg', 'Steganocats hide yr things'.upper())
+    meme_writer.hide_msg(steganocat, emb)
+    steganocat.save('STEGANOCATS.jpg')
+    recovered = meme_writer.find_msg(steganocat)
+    print('recovered', recovered)
+    print(recovered == emb)
 
 if __name__ == '__main__':
     main()
