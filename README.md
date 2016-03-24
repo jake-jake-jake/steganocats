@@ -32,14 +32,8 @@ The `flag` attribute is the byte MemeWriter uses to mark the first pixel of a ro
 
 These two messages currently taken a Pillow image object as an argument; I may change this to an image filename in the future. hide_msg takes `hidden` as an argument; `hidden` should be a byteliteral.
 
-## Steganography is note cryptography
+## Steganography is not cryptography
 
-Obligatory note that steganography is not encryption; but Steganocats will happily hide your encrypted data in kitty pix.
+Obligatory note that steganography is not encryption; but Steganocats will happily hide your encrypted data in kitty memes.
 
 Photo: [meliha tunckanat](https://www.flickr.com/photos/tunckanat/4729470797/) 
-
-
-
-
-
-
