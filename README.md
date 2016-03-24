@@ -34,7 +34,7 @@ These two messages currently taken a Pillow image object as an argument; I may c
 
 ## Steganography is note cryptography
 
-Obligatory note that steganography is not encryption; but STEGANOCATS will happily hide your encrypted data in kitty pix.
+Obligatory note that steganography is not encryption; but Steganocats will happily hide your encrypted data in kitty pix.
 
 Photo: [meliha tunckanat](https://www.flickr.com/photos/tunckanat/4729470797/) 
 
