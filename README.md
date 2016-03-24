@@ -18,7 +18,7 @@ The MemeWriter class is a bag of methods for hiding messages in cat memes. It de
 
 ### mode
 
-In order to conceal bytes, the mode must be `L` or `RGBA`. If you're interested in why this is or how the message is encoded, details can be found in the comments of the code.
+In order to conceal bytes, the mode must be `L` or `RGBA`. If you're interested in why this is or how the message is encoded, details are spelled out in comments in the code.
 
 ### flag
 The `flag` attribute is the byte MemeWriter uses to mark the first pixel of a row it is encoding hidden bytes into. It defaults to `\n`.
@@ -30,6 +30,8 @@ The `flag` attribute is the byte MemeWriter uses to mark the first pixel of a ro
 ### hide_ and find_msg
 
 These two messages currently taken a Pillow image object as an argument; I may change this to an image filename in the future. hide_msg takes `hidden` as an argument; `hidden` should be a byteliteral. 
+
+
 
 
 
