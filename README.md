@@ -5,7 +5,7 @@ Steganocats is cat meme-maker with a twist: it conceals arbitrary bytes in the i
 
 ## Base Images
 
-Steganocats draws a random image from the `base_images/` directory to use for the base image of the meme. The default image is XXX, taken from XXX, and used under CC license XXX. Use something other than this adorable furball in your own projects.
+Steganocats draws a random image from the `base_images/` directory to use for the base image of the meme. Use something other than this adorable furball in your own projects.
 
 ### Getting Images from Flickr
 
