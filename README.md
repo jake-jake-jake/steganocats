@@ -1,3 +1,4 @@
+![Steganokitty is Cute](https://github.com/jake-jake-jake/steganocats/blob/master/STEGANOCATS.jpg)
 # STEGANOCATS HIDES YOUR THINGS
 
 Steganocats is cat meme-maker with a twist: it conceals arbitrary bytes in the images it generates. Why you would want to do this is for you to figure out--maybe you only want your friends to know where the clubhouse is, maybe your sense of irony operates in strange dimensions--but if you do, Steganocats will make the whole process, from fetching images to meme-ifying them, as easy and fun as a bag of cats.
@@ -29,7 +30,13 @@ The `flag` attribute is the byte MemeWriter uses to mark the first pixel of a ro
 
 ### hide_ and find_msg
 
-These two messages currently taken a Pillow image object as an argument; I may change this to an image filename in the future. hide_msg takes `hidden` as an argument; `hidden` should be a byteliteral. 
+These two messages currently taken a Pillow image object as an argument; I may change this to an image filename in the future. hide_msg takes `hidden` as an argument; `hidden` should be a byteliteral.
+
+## Steganography is note cryptography
+
+Obligatory note that steganography is not encryption; but STEGANOCATS will happily hide your encrypted data in kitty pix.
+
+Photo: [meliha tunckanat](https://www.flickr.com/photos/tunckanat/4729470797/) 
 
 
 
