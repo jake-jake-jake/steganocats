@@ -15,7 +15,7 @@ To query Flickr for images, you will need a [Flickr API key](https://www.flickr.
 
 ## MemeWriter class
 
-The `MemeWriter` class is a bag of methods for hiding messages in memes. It delegates the heavy lifting of image manipulation to `Pillow`, and I have done my best to make sure you don't have to know a thing about it to make your images. Each instance of `MemeWriter` has a `mode` and a `flag` attribute, which control the mode of the output image and the byte that is encoded to flag the location of the hidden data. `MemeWriter` has three main methods: `write_meme` for creating memes, and `hide_msg` and `find_msg` for concealing and uncovering hidden bytes.
+The `MemeWriter` class is a bag of methods for hiding messages in memes. It delegates the heavy lifting of image manipulation to `Pillow`, and I have done my best to make sure you don't have to know a thing about image files or `Pillow` classes to make your memes. Each instance of `MemeWriter` has a `mode` and a `flag` attribute, which control the mode of the output image and the byte that is encoded to flag the location of the hidden data. `MemeWriter` has three main methods: `write_meme` for creating memes, and `hide_msg` and `find_msg` for concealing and uncovering hidden bytes.
 
 ### mode
 
