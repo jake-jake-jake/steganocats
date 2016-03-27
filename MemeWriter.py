@@ -29,12 +29,12 @@ class MemeWriter:
         if overflow_bits: byte_len += 1
         # Get flag byte from state if none provided in arguments
         if not flag: flag = self.flag
-        # If x_width not enuf to hold len(hidden) + byte_len + null byte 
+        # If x_width not enuf to hold len(hidden) + byte_len + null byte
         # throw an error
         assert x_width > len(hidden) + byte_len + 1
         return flag + len(hidden).to_bytes(byte_len, byteorder='little') + b'\x00'
 
-    def _find_row(img_obj, flag=None):
+    def _find_flag(img_obj, flag=None):
         ''' If row of encoding unknown, search image for flag bytes.'''
         if not flag:
             f = self.flag
