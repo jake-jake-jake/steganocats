@@ -28,7 +28,7 @@ The `flag` attribute is the byte `MemeWriter` uses to mark the first pixel of a 
 
 `write_meme` takes two arguments, `fp`, a file object or file-like object representing the image to be manipulated, and `phrase`, the text to be meme-ified.
 
-### hide_ and find_msg
+### hide_msg and find_msg
 
 These two messages currently taken a `Pillow` image object as an argument; they will be refactored to take a `fp`, as with `write_meme`. `hide_msg` takes `hidden` as an argument; `hidden` should be a byteliteral.
 
