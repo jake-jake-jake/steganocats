@@ -1,16 +1,52 @@
 #!/usr/bin/env python3
 
+# Standard Lib
+import argparse
 import json
 from os import path, listdir
-import requests
 import random
+import sys
 
+# PIP modules
 import flickrapi
+import requests
 
+# Steganocats modules
 from MemeWriter import MemeWriter
 
+# Global Constants
 SECRETS_FILE = 'secrets.json'
-BASE_IMAGES_DIR = 'base_images'
+IMAGES_DIR = 'base_images'
+SAVE_DIR = 'memes'
+
+
+# Parse command-line arguments
+parser = argparse.ArgumentParser('Make some STEGANOCATS')
+parser.add_argument('-t', '--tag', dest='tag', action='store', default='cat',
+                    help='flickr search tag', metavar='flickr tag')
+parser.add_argument('--meme', dest='meme_only', action='store_true',
+                    default=False, help='make meme only, no steganograghy')
+parser.add_argument('--steg', dest='steg_only', action='store_true',
+                    default=False, help='make steganograghy only, no meme')
+parser.add_argument('-m', '--mode', dest='mode', default='RGBA',
+                    action='store', help='mode to process image in',
+                    choices={'L', 'RGBA'}, metavar='mode')
+parser.add_argument('-b', '--base', dest='base_image', default=None,
+                    help='base image to meme, steg, or search')
+parser.add_argument('-f', '--flickr', dest='query_flickr', action='store_true',
+                    default=False, help='query Flickr for images')
+parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
+                    default=False, help='show verbose comments')
+parser.add_argument('-i', dest='infile', action='store',
+                    help='file to be hidden in image', metavar='in file')
+parser.add_argument('-S', dest='stego_bytes', action='store',
+                    help='string to be hidden in image (as bytes)',
+                    metavar='stego bytes')
+parser.add_argument('--search', dest='find_steg', action='store_true',
+                    default=False, help='search base image')
+args = parser.parse_args()
+
+
 
 # Flickr functions (for getting images)
 def get_secret(setting, json_obj):
@@ -34,13 +70,14 @@ def make_flickr_api(secrets_filename, format='json'):
 
 def download_img(farm, server, photo_id, secret, owner, o_secret):
     ''' Given metadata from tag search JSON, attempt to DL image.'''
-    file_path = path.relpath(BASE_IMAGES_DIR + '/' + photo_id + '_' + owner)
-    if path.isfile(file_path):
+    file_path = path.relpath(IMAGES_DIR + '/' + photo_id + '_' + owner)
+    if path.isfile(file_path) and args.verbose:
         print('Already have image.')
         return False
     url = 'https://farm{}.staticflickr.com/{}/{}_{}_b.jpg'.format(farm,
             server, photo_id, secret)
-    print('Using URL: \n %s' % url)
+    if args.verbose:
+        print('Using URL: \n %s' % url)
     r =  requests.get(url)
     if r.status_code == 200:
         with open(file_path, 'wb') as f:
@@ -50,23 +87,25 @@ def download_img(farm, server, photo_id, secret, owner, o_secret):
         return False
 
 
-
-def get_images_by_tag(tag='cat'):
+def get_images_by_tag(flickr_api, tag='cat'):
     ''' Return a list of URLs to query for images.'''
-    resp = flickr.photos.search(tags=tag, license=[1,2,3,5])
+    flickr = flickr_api
+    resp = flickr.photos.search(tags=tag, license=[1, 2, 3, 5])
     resp = json.loads(str(resp, 'utf8'))
     for photo in resp['photos']['photo']:
         photo_id, secret, owner = photo['id'], photo['secret'], photo['owner']
         farm, server = photo['farm'], photo['server']
-        info = flickr.photos.getInfo(photo_id=photo_id, secret=secret)
-        info = json.loads(str(info, 'utf8'))
-        o_secret = info['photo']['originalsecret']
-        print('Attempting to download img: %s.' % photo_id)
-        download_img(farm, server, photo_id, secret, owner, o_secret)
+        # These lines useful for querying original, large-size images.
+        # info = flickr.photos.getInfo(photo_id=photo_id, secret=secret)
+        # info = json.loads(str(info, 'utf8'))
+        # o_secret = info['photo']['originalsecret']
+        if args.verbose:
+            print('Attempting to download img: %s.' % photo_id)
+        download_img(farm, server, photo_id, secret, owner, None)
     pass
 
 
-def get_img_file(img_folder=BASE_IMAGES_DIR):
+def get_img_file(img_folder=IMAGES_DIR):
     ''' Return random image from specified folder.'''
     file_name = random.choice(listdir(img_folder))
     return file_name
@@ -78,24 +117,43 @@ def get_meme_text(phrase_file='hazburger.txt'):
         return random.choice(f.read().split('\n'))
 
 
-# flickr = make_flickr_api(SECRETS_FILE)
-# get_images_by_tag('kitty')
+def main():
+    # Query flickr if flags set
+    if args.query_flickr:
+        flickr = make_flickr_api(SECRETS_FILE)
+        get_images_by_tag(flickr, args.tag)
+    # Instantiate meme writer
+    meme_writer = MemeWriter(args.mode)
+    
+    # Allow for user selected image
+    if not args.base_image:
+        img_file = get_img_file()
+    else:
+        img_file = args.base_image
 
-def main(debug=True):
-    if debug:
-        for _ in range(10):
-            img_folder = path.relpath(BASE_IMAGES_DIR)
-            save_folder = path.relpath('memes/')
-            msg = get_meme_text()
-            print(msg)
-            mode = random.choice(['L', 'RGBA'])
-            print(mode)
-            meme_writer = MemeWriter(mode)
-            img = img_folder + '/' + get_img_file(img_folder)
-            print(img)
-            steganocat = meme_writer.write_meme(img, msg)
-            meme_writer.hide_msg(steganocat, msg)
-            steganocat.save(save_folder + '/' + str(_) + ".jpg")
+    # if finding hidden message, do before anything else and pass
+    if args.find_steg:
+        print(meme_writer.find_msg(img_file))
+        pass
+
+    # do meme making if not steganography only
+    if not args.steg_only:
+        meme_phrase = get_meme_text()
+        img_obj = meme_writer.write_meme(path.join(IMAGES_DIR, img_file),
+                                         meme_phrase)
+        if args.meme_only:
+            img_obj.save(path.join(SAVE_DIR, img_file + '-meme.jpg'))
+            pass
+
+    # finally do steganography if not meme only
+    img = img_obj or path.join(IMAGES_DIR, img_file)
+    hidden = args.infile or args.stego_bytes
+    img = meme_writer.hide_msg(img, hidden)
+    img.save(path.join(SAVE_DIR, img_file + '-steg.jpg'))
+
+
+
+
 
 if __name__ == '__main__':
     main()
