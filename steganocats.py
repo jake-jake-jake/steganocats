@@ -10,7 +10,7 @@ import flickrapi
 from MemeWriter import MemeWriter
 
 SECRETS_FILE = 'secrets.json'
-
+BASE_IMAGES_DIR = 'base_images'
 
 # Flickr functions (for getting images)
 def get_secret(setting, json_obj):
@@ -34,11 +34,11 @@ def make_flickr_api(secrets_filename, format='json'):
 
 def download_img(farm, server, photo_id, secret, owner, o_secret):
     ''' Given metadata from tag search JSON, attempt to DL image.'''
-    file_path = path.relpath('scraped_images/' + photo_id + '_' + owner)
+    file_path = path.relpath(BASE_IMAGES_DIR + '/' + photo_id + '_' + owner)
     if path.isfile(file_path):
         print('Already have image.')
         return False
-    url = 'https://farm{}.staticflickr.com/{}/{}_{}_k.jpg'.format(farm,
+    url = 'https://farm{}.staticflickr.com/{}/{}_{}_b.jpg'.format(farm,
             server, photo_id, secret)
     print('Using URL: \n %s' % url)
     r =  requests.get(url)
@@ -66,28 +66,34 @@ def get_images_by_tag(tag='cat'):
     pass
 
 
-def get_img_file(img_folder):
+def get_img_file(img_folder=BASE_IMAGES_DIR):
     ''' Return random image from specified folder.'''
     file_name = random.choice(listdir(img_folder))
     return file_name
 
 
+def get_meme_text(phrase_file='hazburger.txt'):
+    ''' Choose random phrase from phrase_file'''
+    with open(phrase_file, 'r') as f:
+        return random.choice(f.read().split('\n'))
 
-flickr = make_flickr_api(SECRETS_FILE)
-get_images_by_tag('kitty')
 
-def main(debug=False):
+# flickr = make_flickr_api(SECRETS_FILE)
+# get_images_by_tag('kitty')
+
+def main(debug=True):
     if debug:
         for _ in range(10):
-            img_folder = path.relpath('scraped_images/')
+            img_folder = path.relpath(BASE_IMAGES_DIR)
             save_folder = path.relpath('memes/')
-            msg = '''The Naming of Cats is a difficult matter,
-            It isn't just one of your holiday games;
-            You may think at first I'm as mad as a hatter
-            When I tell you, a cat must have THREE DIFFERENT NAMES.'''
-            meme_writer = MemeWriter()
-            steganocat = meme_writer.write_meme(img_folder + '/' + 
-                get_img_file(img_folder), 'Hazburger')
+            msg = get_meme_text()
+            print(msg)
+            mode = random.choice(['L', 'RGBA'])
+            print(mode)
+            meme_writer = MemeWriter(mode)
+            img = img_folder + '/' + get_img_file(img_folder)
+            print(img)
+            steganocat = meme_writer.write_meme(img, msg)
             meme_writer.hide_msg(steganocat, msg)
             steganocat.save(save_folder + '/' + str(_) + ".jpg")
 
