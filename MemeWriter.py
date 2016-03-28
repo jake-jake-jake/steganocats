@@ -89,13 +89,17 @@ class MemeWriter:
         draw.text((x_insert, y_insert), phrase, font=font, fill='white')
         return img_obj
 
-    def hide_msg(self, img_obj, hidden, mode=None, pos=None):
+    def hide_msg(self, fp, hidden, mode=None, pos=None):
         ''' Randomize x pixels at y height, then encode hidden data into that
             row.
 
             mode => defaults to instance variable
             pos => defaults to the bottom row of the image
         '''
+        if isinstance(fp, Image.Image):
+            img_obj = fp
+        else:
+            img_obj = self._open_img(fp)
         x, y = img_obj.size
         if not mode:  # if no mode passed, default to instance variable.
             mode = self.mode
@@ -150,13 +154,17 @@ class MemeWriter:
                 except:
                     break
                 i += 1
-            pass
+            return img_obj
 
         else:
             raise AttributeError('Only greyscale and RGBA imges supported.')
 
-    def find_msg(self, img_obj, pos=None, mode=None):
+    def find_msg(self, fp, pos=None, mode=None):
         ''' Find hidden message in an image.'''
+        if isinstance(fp, Image.Image):
+            img_obj = fp
+        else:
+            img_obj = self._open_img(fp)
         x, y = img_obj.size
         if not pos:
             pos = y - 1
@@ -175,7 +183,7 @@ class MemeWriter:
             # Find length of message
             idx, count = 1, []
             while True:
-                if not pix_strip[idx] == 0x00: 
+                if not pix_strip[idx] == 0x00:
                     count.append(pix_strip[idx])
                     idx += 1
                 else:
@@ -186,7 +194,7 @@ class MemeWriter:
             # Get step of embedding and retrieve message.
             message_len = int.from_bytes(count, byteorder='little')
             step = (x - idx) // message_len
-            message_pixels = bytes([pix_strip[x] 
+            message_pixels = bytes([pix_strip[x]
                              for x in range(idx, x, step)])
             return message_pixels[:message_len]
 
@@ -199,7 +207,7 @@ class MemeWriter:
             # Find length of message
             idx, count = 1, []
             while True:
-                if not pix_strip[idx][3] == 0x00: 
+                if not pix_strip[idx][3] == 0x00:
                     count.append(pix_strip[idx][3])
                     idx += 1
                 else:
@@ -217,12 +225,9 @@ class MemeWriter:
         else:
             raise AttributeError('Unsupported photo mode')
 
-def main(debug=True):
+
+def main(debug=False):
     ''' Some debug tests for when this is being put together'''
-    msg = b''' The Naming of Cats is a difficult matter,
-              It isn't just one of your holiday games;
-              You may think at first I'm as mad as a hatter
-              When I tell you, a cat must have THREE DIFFERENT NAMES.'''
     emb = open('grey_thumb.jpg', 'rb').read()
     meme_writer = MemeWriter(mode='RGBA')
     steganocat = meme_writer.write_meme('4729470797_c93d775dc1_o.jpg', 'Steganocats hide yr things'.upper())
@@ -232,6 +237,11 @@ def main(debug=True):
     print('recovered', recovered)
     print(recovered == emb)
 
+
+msg = b'''The Naming of Cats is a difficult matter,
+It isn't just one of your holiday games;
+You may think at first I'm as mad as a hatter
+When I tell you, a cat must have THREE DIFFERENT NAMES.'''
+
 if __name__ == '__main__':
     main()
-    
