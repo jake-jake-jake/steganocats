@@ -3,11 +3,11 @@
 
 Steganocats is cat meme-maker with a twist: it conceals arbitrary bytes in the images it generates. Why you would want to do this is for you to figure out&mdash;maybe you only want your friends to know where the clubhouse is, maybe your sense of irony operates in strange dimensions&mdash;but if you do, Steganocats will make the whole process, from fetching images to meme-ifying them, as easy and fun as a bag of cats.
 
-## Base Images
+## Base images
 
 Steganocats draws a random image from the `base_images/` directory to use for the base image of the meme. Use something other than the adorable furball above in your own projects.
 
-### Getting Images from Flickr
+### Getting images from Flickr
 
 Steganocats relies on the `flickrapi` package to query Flickr for images. This is an optional step; you can use whatever images you want with Steganocats by putting them in the `base_images/` directory. But querying Flickr for rights-free photos already pre-tagged by attention-hungry amateur photographers is a fun and easy way to find JPGs for your needs. We (that is, I, Jake) like cats&mdash;[the internet is for cats](https://en.wikipedia.org/wiki/Cats_and_the_Internet)&mdash;so Steganocats defaults to searching for `cat`.
 
