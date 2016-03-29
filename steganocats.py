@@ -130,14 +130,18 @@ def main():
         img_file = get_img_file()
     else:
         img_file = args.base_image
-    print('img_file', img_file)
+    if args.verbose:
+        print('Using %s as base image.', img_file)
 
     # if finding hidden message, do before anything else and pass
     if args.find_steg:
+        if args.verbose:
+            print('Searching for hidden bytes.')
         print(meme_writer.find_msg(img_file))
         return None
 
-    print('Meme steps.')
+    if args.verbose:
+        print('Doing meme steps.')
     # do meme making if not steganography only
     if not args.steg_only:
         meme_phrase = get_meme_text()
@@ -148,11 +152,11 @@ def main():
             pass
 
     # finally do steganography if not meme only
-    print('Steg steps.')
+    if args.verbose:
+        print('Doing steganographic steps.')
     img = img_obj or path.join(IMAGES_DIR, img_file)
     if not args.infile:
         hidden = bytes(args.stego_bytes, 'utf8')
-        print('input', args.stego_bytes, hidden)
     else:
         hidden = open(args.infile, 'rb').read()
     img = meme_writer.hide_msg(img, hidden)
