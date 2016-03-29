@@ -87,3 +87,7 @@ ENV/
 # Specific For this project
 secrets.json
 *.sublime-project
+
+# media folders
+memes/
+base_images
