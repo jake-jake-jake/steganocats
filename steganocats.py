@@ -130,29 +130,33 @@ def main():
         img_file = get_img_file()
     else:
         img_file = args.base_image
+    print('img_file', img_file)
 
     # if finding hidden message, do before anything else and pass
     if args.find_steg:
         print(meme_writer.find_msg(img_file))
-        pass
+        return None
 
+    print('Meme steps.')
     # do meme making if not steganography only
     if not args.steg_only:
         meme_phrase = get_meme_text()
         img_obj = meme_writer.write_meme(path.join(IMAGES_DIR, img_file),
                                          meme_phrase)
         if args.meme_only:
-            img_obj.save(path.join(SAVE_DIR, img_file + '-meme.jpg'))
+            img_obj.save(path.join(SAVE_DIR, img_file + '-meme.png'))
             pass
 
     # finally do steganography if not meme only
+    print('Steg steps.')
     img = img_obj or path.join(IMAGES_DIR, img_file)
-    hidden = args.infile or args.stego_bytes
+    if not args.infile:
+        hidden = bytes(args.stego_bytes, 'utf8')
+        print('input', args.stego_bytes, hidden)
+    else:
+        hidden = open(args.infile, 'rb').read()
     img = meme_writer.hide_msg(img, hidden)
-    img.save(path.join(SAVE_DIR, img_file + '-steg.jpg'))
-
-
-
+    img.save(path.join(SAVE_DIR, img_file + '-steg.png'))
 
 
 if __name__ == '__main__':
