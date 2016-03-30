@@ -5,7 +5,7 @@ Steganocats is cat meme-maker with a twist: it conceals arbitrary bytes in the i
 
 ## Command Line Interface
 
-There is a simple command line interface that will allow you to make queries via the shell if you don't want to do things in the interpreter. `python steganocats.py -h` should get you started.
+There is a simple command line interface that will allow you to make memes via the terminal if you don't want to do things in a Python interpreter. `python steganocats.py -h` should get you started.
 
 ## Base images
 
@@ -23,7 +23,7 @@ The `MemeWriter` class is a bag of methods for hiding messages in memes. It dele
 
 ### mode
 
-In order to conceal bytes, the `mode` attribute must be set to `L` (greyscale) or `RGBA` (four-channel JPG). If you're interested in why this is or how the bytes are ensconced, I have detailed the process in the code.
+In order to conceal bytes, the `mode` attribute must be set to `L` (greyscale) or `RGBA` (four-channel PNG). If you're interested in why this is or how the bytes are ensconced, I have detailed the process in the code.
 
 ### flag
 The `flag` attribute is the byte `MemeWriter` uses to mark the first pixel of a row it is encoding hidden bytes into. It defaults to `\n`. If you want to modify the flag byte (or the process of flag generation and searching entirely), the private methods `_make_flag_bytes` and `_find_flag` will be of interest to you.
@@ -39,5 +39,9 @@ These two messages currently taken a `Pillow` image object as an argument; they 
 ## Steganography is not cryptography
 
 Obligatory note that steganography is not encryption; you shouldn't count on the obscurity of your hidden message keeping it secure. That said, Steganocats will happily hide your encrypted bytes in kitty memes.
+
+## Version notes
+
+v. 0.7 (March 29, 2016): It works, or should, mostly. The code is not pristine. There's only one, readily detectable mean of hiding info in images. Images are saved as PNGs.
 
 Photo: [meliha tunckanat](https://www.flickr.com/photos/tunckanat/4729470797/) 
