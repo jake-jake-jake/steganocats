@@ -41,7 +41,7 @@ parser.add_argument('-i', dest='infile', action='store',
                     help='file to be hidden in image', metavar='in file')
 parser.add_argument('-S', dest='stego_bytes', action='store',
                     help='string to be hidden in image (as bytes)',
-                    metavar='stego bytes')
+                    metavar='stego bytes', default='')
 parser.add_argument('--search', dest='find_steg', action='store_true',
                     default=False, help='search base image')
 args = parser.parse_args()
@@ -149,7 +149,7 @@ def main():
                                          meme_phrase)
         if args.meme_only:
             img_obj.save(path.join(SAVE_DIR, img_file + '-meme.png'))
-            pass
+            return None
 
     # finally do steganography if not meme only
     if args.verbose:
@@ -159,7 +159,7 @@ def main():
         hidden = bytes(args.stego_bytes, 'utf8')
     else:
         hidden = open(args.infile, 'rb').read()
-    img = meme_writer.hide_msg(img, hidden)
+    meme_writer.hide_msg(img, hidden)
     img.save(path.join(SAVE_DIR, img_file + '-steg.png'))
 
 
