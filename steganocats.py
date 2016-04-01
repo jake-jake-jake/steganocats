@@ -38,10 +38,11 @@ parser.add_argument('-f', '--flickr', dest='query_flickr', action='store_true',
 parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
                     default=False, help='show verbose comments')
 parser.add_argument('-i', dest='infile', action='store',
-                    help='file to be hidden in image', metavar='in file')
+                    help='file to be hidden in image', metavar='in file',
+                    default='naming_of_cats.txt')
 parser.add_argument('-S', dest='stego_bytes', action='store',
                     help='string to be hidden in image (as bytes)',
-                    metavar='stego bytes', default='')
+                    metavar='stego bytes', default='KITTYKATZ')
 parser.add_argument('--search', dest='find_steg', action='store_true',
                     default=False, help='search base image')
 args = parser.parse_args()
@@ -131,7 +132,7 @@ def main():
     else:
         img_file = args.base_image
     if args.verbose:
-        print('Using %s as base image.', img_file)
+        print('Using %s as base image.' % img_file)
 
     # if finding hidden message, do before anything else and pass
     if args.find_steg:
