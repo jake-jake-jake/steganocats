@@ -109,12 +109,11 @@ class MemeWriter:
             raise ValueError('Message will not fit in image.', E)
         # load image pixels
         pixels = img_obj.load()
+        
         for px in range(x):  # Randomize target row of pixels.
             r, g, b, a = pixels[px, pos]
             new_a = random.randint(0, 255)
             pixels[px, pos] = (r, g, b, new_a)
-        
-
         for px in range(0, len(f)):  # Write flag bytes
             r, g, b, a = pixels[px, pos]
             new_a = f[px]
