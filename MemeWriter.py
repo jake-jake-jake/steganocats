@@ -69,6 +69,70 @@ class MemeWriter:
         else:
             return 4
 
+    def _conceal_row_L(self, img_obj, hidden, pos):
+        ''' Conceal row of bytes in greyscale image.'''
+        x, y = img_obj.size
+        if not pos:  # Write to bottom row of image if no position specified
+            pos = y - 1
+        # Make insertion flag
+        try:
+            f = self._make_flag_bytes(x, hidden)
+        except Exception as E:
+            raise ValueError('Message will not fit in image.', E)
+        # load image pixels
+        pixels = img_obj.load()
+        for px in range(x):  # Randomize target row of pixels.
+            pixels[px, pos] = random.randint(0, 255)
+        for px in range(0, len(f)):  # Write flag bytes
+            pixels[px, pos] = f[px]
+        step = (x - len(f)) // len(hidden)  # Get step for writing pixels
+
+        #  Encode message
+        i = 0
+        for px in range(len(f), x, step):
+            try:
+                pixels[px, pos] = int(hidden[i])
+            except:
+                break
+            i += 1
+        return img_obj
+
+    def _conceal_row_RGBA(self, img_obj, hidden, pos):
+        ''' Conceal row of bytes in greyscale image.'''
+        x, y = img_obj.size
+        if not pos:  # Write to bottom row of image if no position specified
+            pos = y - 1
+        # Make insertion flag
+        try:
+            f = self._make_flag_bytes(x, hidden)
+        except Exception as E:
+            raise ValueError('Message will not fit in image.', E)
+        # load image pixels
+        pixels = img_obj.load()
+        for px in range(x):  # Randomize target row of pixels.
+            r, g, b, a = pixels[px, pos]
+            new_a = random.randint(0, 255)
+            pixels[px, pos] = (r, g, b, new_a)
+        
+
+        for px in range(0, len(f)):  # Write flag bytes
+            r, g, b, a = pixels[px, pos]
+            new_a = f[px]
+            pixels[px, pos] = (r, g, b, new_a)
+        step = (x - len(f)) // len(hidden)  # Get step for writing pixels
+
+        #  Encode message
+        i = 0
+        for px in range(len(f), x, step):
+            try:
+                r, g, b, a = pixels[px, pos]
+                new_a = int(hidden[i])
+                pixels[px, pos] = (r, g, b, new_a)
+            except:
+                break
+            i += 1
+        return img_obj
+
     def write_meme(self, fp, phrase):
         ''' Returns image with hazburger phrase superimposed on it.'''
         img_obj = self._open_img(fp)
@@ -100,62 +164,14 @@ class MemeWriter:
             img_obj = fp
         else:
             img_obj = self._open_img(fp)
-        x, y = img_obj.size
         if not mode:  # if no mode passed, default to instance variable.
             mode = self.mode
-        if not pos:  # Write to bottom row of image of no position specified
-            pos = y - 1
 
-        # Make insertion flag
-        try:
-            f = self._make_flag_bytes(x, hidden)
-        except Exception:
-            raise ValueError('Message will not fit in image.')
-        # load image pixels
-        pixels = img_obj.load()
-
-        # In black and white images, only one byte per pix
+        # Return black and white (L) or full color image (RBGA) per mode.
         if mode == 'L':
-            for px in range(x):  # Randomize target row of pixels.
-                pixels[px, pos] = random.randint(0, 255)
-            for px in range(0, len(f)):  # Write flag bytes
-                pixels[px, pos] = f[px]
-            step = (x - len(f)) // len(hidden)  # Get step for writing pixels
-
-            #  Encode message
-            i = 0
-            for px in range(len(f), x, step):
-                try:
-                    pixels[px, pos] = int(hidden[i])
-                except:
-                    break
-                i += 1
-            pass
-
-        # RGBA images on the other hand have 4 bytes per pixel:
+            return self._conceal_row_L(img_obj, hidden, pos)
         elif mode == 'RGBA':
-            for px in range(x):  # Randomize target row of pixels.
-                r, g, b, a = pixels[px, pos]
-                new_a = random.randint(0, 255)
-                pixels[px, pos] = (r, g, b, new_a)
-            for px in range(0, len(f)):  # Write flag bytes
-                r, g, b, a = pixels[px, pos]
-                new_a = f[px]
-                pixels[px, pos] = (r, g, b, new_a)
-            step = (x - len(f)) // len(hidden)  # Get step for writing pixels
-
-            #  Encode message
-            i = 0
-            for px in range(len(f), x, step):
-                try:
-                    r, g, b, a = pixels[px, pos]
-                    new_a = int(hidden[i])
-                    pixels[px, pos] = (r, g, b, new_a)
-                except:
-                    break
-                i += 1
-            return img_obj
-
+            return self._conceal_row_RGBA(img_obj, hidden, pos)
         else:
             raise AttributeError('Only greyscale and RGBA imges supported.')
 
@@ -226,11 +242,11 @@ class MemeWriter:
             raise AttributeError('Unsupported photo mode')
 
 
-def main(debug=False):
+def main(debug=True):
     ''' Some debug tests for when this is being put together'''
-    emb = open('grey_thumb.jpg', 'rb').read()
-    meme_writer = MemeWriter(mode='RGBA')
-    steganocat = meme_writer.write_meme('4729470797_c93d775dc1_o.jpg', 'Steganocats hide yr things'.upper())
+    emb = b'hidden stuffs'
+    meme_writer = MemeWriter(mode='L')
+    steganocat = meme_writer.write_meme('kitten.jpg', 'Steganocats hide yr things'.upper())
     meme_writer.hide_msg(steganocat, emb)
     steganocat.save('STEGANOCATS.jpg')
     recovered = meme_writer.find_msg(steganocat)
