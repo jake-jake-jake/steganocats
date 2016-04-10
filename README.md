@@ -1,4 +1,4 @@
-![Steganokitty is Cute](https://github.com/jake-jake-jake/steganocats/blob/master/STEGANOCATS.jpg)
+![Steganokitty is Cute](https://github.com/jake-jake-jake/steganocats/blob/master/STEGANOCATS.png)
 # STEGANOCATS HIDES YOUR THINGS
 
 Steganocats is cat meme-maker with a twist: it conceals arbitrary bytes in the images it generates. Why you would want to do this is for you to figure out&mdash;maybe you only want your friends to know where the clubhouse is, maybe your sense of irony operates in strange dimensions&mdash;but if you do, Steganocats will make the whole process, from fetching images to meme-ifying them, as easy and fun as a bag of cats.
