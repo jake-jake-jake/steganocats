@@ -18,6 +18,7 @@ from MemeWriter import MemeWriter
 SECRETS_FILE = 'secrets.json'
 IMAGES_DIR = 'base_images'
 SAVE_DIR = 'memes'
+PHRASE_FILE ='hazburger.txt'
 
 
 # Parse command-line arguments
@@ -46,7 +47,6 @@ parser.add_argument('-S', dest='stego_bytes', action='store',
 parser.add_argument('--search', dest='find_steg', action='store_true',
                     default=False, help='search base image')
 args = parser.parse_args()
-
 
 
 # Flickr functions (for getting images)
@@ -106,15 +106,17 @@ def get_images_by_tag(flickr_api, tag='cat'):
     pass
 
 
+# Get random file from IMAGES_DIR
 def get_img_file(img_folder=IMAGES_DIR):
     ''' Return random image from specified folder.'''
     file_name = random.choice(listdir(img_folder))
     return file_name
 
 
-def get_meme_text(phrase_file='hazburger.txt'):
-    ''' Choose random phrase from phrase_file'''
-    with open(phrase_file, 'r') as f:
+# 
+def get_meme_text():
+    ''' Choose random phrase from PHRASE_FILE'''
+    with open(PHRASE_FILE, 'r') as f:
         return random.choice(f.read().split('\n'))
 
 
