@@ -5,7 +5,6 @@ import argparse
 import json
 from os import path, listdir
 import random
-import sys
 
 # PIP modules
 import flickrapi
@@ -18,7 +17,7 @@ from MemeWriter import MemeWriter
 SECRETS_FILE = 'secrets.json'
 IMAGES_DIR = 'base_images'
 SAVE_DIR = 'memes'
-PHRASE_FILE ='hazburger.txt'
+PHRASE_FILE = 'hazburger.txt'
 
 
 # Parse command-line arguments
@@ -39,8 +38,7 @@ parser.add_argument('-f', '--flickr', dest='query_flickr', action='store_true',
 parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
                     default=False, help='show verbose comments')
 parser.add_argument('-i', dest='infile', action='store',
-                    help='file to be hidden in image', metavar='in file',
-                    default='naming_of_cats.txt')
+                    help='file to be hidden in image', metavar='in file')
 parser.add_argument('-S', dest='stego_bytes', action='store',
                     help='string to be hidden in image (as bytes)',
                     metavar='stego bytes', default='KITTYKATZ')
@@ -76,10 +74,10 @@ def download_img(farm, server, photo_id, secret, owner, o_secret):
         print('Already have image.')
         return False
     url = 'https://farm{}.staticflickr.com/{}/{}_{}_b.jpg'.format(farm,
-            server, photo_id, secret)
+           server, photo_id, secret)
     if args.verbose:
         print('Using URL: \n %s' % url)
-    r =  requests.get(url)
+    r = requests.get(url)
     if r.status_code == 200:
         with open(file_path, 'wb') as f:
             f.write(r.content)
@@ -113,7 +111,7 @@ def get_img_file(img_folder=IMAGES_DIR):
     return file_name
 
 
-# 
+# Draw meme text from default PHRASE_FILE
 def get_meme_text():
     ''' Choose random phrase from PHRASE_FILE'''
     with open(PHRASE_FILE, 'r') as f:
@@ -127,7 +125,7 @@ def main():
         get_images_by_tag(flickr, args.tag)
     # Instantiate meme writer
     meme_writer = MemeWriter(args.mode)
-    
+
     # Allow for user selected image
     if not args.base_image:
         img_file = get_img_file()
