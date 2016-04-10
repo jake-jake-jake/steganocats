@@ -247,7 +247,7 @@ def main(debug=True):
     meme_writer = MemeWriter(mode='L')
     steganocat = meme_writer.write_meme('kitten.jpg', 'Steganocats hide yr things'.upper())
     meme_writer.hide_msg(steganocat, emb)
-    steganocat.save('STEGANOCATS.jpg')
+    steganocat.save('STEGANOCATS.png')
     recovered = meme_writer.find_msg(steganocat)
     print('recovered', recovered)
     print(recovered == emb)
