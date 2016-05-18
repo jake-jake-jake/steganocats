@@ -67,23 +67,24 @@ def make_flickr_api(secrets_filename, format='json'):
                                format=format)
 
 
-def download_img(farm, server, photo_id, secret, owner, o_secret):
+def download_img(**kwargs):
     ''' Given metadata from tag search JSON, attempt to DL image.'''
-    file_path = path.relpath(IMAGES_DIR + '/' + photo_id + '_' + owner)
+    file_path = path.relpath(IMAGES_DIR + '/' + kwargs['photo_id'] +
+                             '_' + kwargs['owner'] + '.jpg')
     if path.isfile(file_path) and args.verbose:
         print('Already have image.')
-        return False
-    url = 'https://farm{}.staticflickr.com/{}/{}_{}_b.jpg'.format(farm,
-           server, photo_id, secret)
+        return
+    url = 'https://farm{}.staticflickr.com/{}/{}_{}_b.jpg'.format(
+        kwargs['farm'], kwargs['server'], kwargs['photo_id'], kwargs['secret'])
     if args.verbose:
         print('Using URL: \n %s' % url)
     r = requests.get(url)
     if r.status_code == 200:
         with open(file_path, 'wb') as f:
             f.write(r.content)
-            return True
+            return
     else:
-        return False
+        return
 
 
 def get_images_by_tag(flickr_api, tag='cat'):
@@ -91,17 +92,13 @@ def get_images_by_tag(flickr_api, tag='cat'):
     flickr = flickr_api
     resp = flickr.photos.search(tags=tag, license=[1, 2, 3, 5])
     resp = json.loads(str(resp, 'utf8'))
-    for photo in resp['photos']['photo']:
-        photo_id, secret, owner = photo['id'], photo['secret'], photo['owner']
-        farm, server = photo['farm'], photo['server']
-        # These lines useful for querying original, large-size images.
-        # info = flickr.photos.getInfo(photo_id=photo_id, secret=secret)
-        # info = json.loads(str(info, 'utf8'))
-        # o_secret = info['photo']['originalsecret']
-        if args.verbose:
-            print('Attempting to download img: %s.' % photo_id)
-        download_img(farm, server, photo_id, secret, owner, None)
-    pass
+    list_of_attribs = [{'photo_id': photo['id'], 'secret': photo['secret'],
+                        'owner': photo['owner'], 'farm': photo['farm'],
+                        'server': photo['server'], 'tag': tag}
+                        for photo in resp['photos']['photo']]
+    for photo in list_of_attribs:
+        download_img(**photo)
+    return
 
 
 # Get random file from IMAGES_DIR
